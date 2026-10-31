@@ -4,12 +4,11 @@
     <strong>High-ratio lossless data compression library and CLI</strong>
   </p>
   <p align="center">
-    <a href="https://github.com/SamDreamsMaker/Max-Compression/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/SamDreamsMaker/Max-Compression/ci.yml?style=flat-square&label=CI" alt="CI"></a>
-    <a href="https://github.com/SamDreamsMaker/Max-Compression/releases/latest"><img src="https://img.shields.io/github/v/release/SamDreamsMaker/Max-Compression?style=flat-square&label=release" alt="Release"></a>
+    <a href="https://github.com/thebrazenbeard/Max-Compression/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/thebrazenbeard/Max-Compression/ci.yml?style=flat-square&label=CI" alt="CI"></a>
     <a href="#benchmarks"><img src="https://img.shields.io/badge/Silesia_corpus-4.35×-blue?style=flat-square" alt="Silesia"></a>
-    <a href="#context-mixing-level-28--maximum-compression"><img src="https://img.shields.io/badge/alice29_CM-4.28×_(beats_PAQ8l)-brightgreen?style=flat-square" alt="CM"></a>
+    <a href="#context-mixing-level-28--maximum-compression"><img src="https://img.shields.io/badge/alice29_CM-4.28×_(reported)-blue?style=flat-square" alt="CM"></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-green?style=flat-square" alt="License"></a>
-    <img src="https://img.shields.io/badge/tests-21_passing-brightgreen?style=flat-square" alt="Tests">
+    <img src="https://img.shields.io/badge/tests-21_registered-blue?style=flat-square" alt="Tests">
     <img src="https://img.shields.io/badge/language-C99-orange?style=flat-square" alt="C99">
     <img src="https://img.shields.io/badge/platform-Linux_%7C_macOS_%7C_Windows-lightgrey?style=flat-square" alt="Platform">
   </p>
@@ -19,7 +18,7 @@
 
 MaxCompression (MCX) is a lossless compression library and CLI written in portable C99. It combines multiple compression strategies — LZ77 with adaptive entropy coding, Burrows-Wheeler Transform with multi-table rANS, LZRC (LZ + range coder), and stride-delta preprocessing — under a unified API that automatically selects the best pipeline for each data type.
 
-MCX targets **maximum compression ratio** while maintaining practical speeds. It beats bzip2 on 100% of standard benchmark files and competes with xz/LZMA2 on most data types.
+MCX targets **maximum compression ratio** while maintaining practical speeds. The comparisons below are repository-reported benchmark figures; they have not been independently reproduced as part of this documentation correction.
 
 ## Highlights
 
@@ -28,7 +27,7 @@ MCX targets **maximum compression ratio** while maintaining practical speeds. It
 | kennedy.xls (structured binary) | **50.1×** | xz: 21.0× — **2.4× better** |
 | nci (chemical text, 33 MB) | **25.7×** | xz: 19.3× — **33% better** |
 | alice29.txt (English text, L20) | **3.52×** | bzip2: 3.52× — **matches bzip2** |
-| alice29.txt (English text, L28 CM) | **4.28×** | PAQ8l: 4.28× — **beats PAQ8l** |
+| alice29.txt (English text, L28 CM) | **4.28×** | PAQ8l: 4.28× — **same ratio at the shown precision** |
 | mozilla (50 MB binary archive) | **3.22×** | xz: 3.55× — **91% of xz** |
 | enwik8 (100 MB Wikipedia) | **4.04×** | xz: 3.89× — **beats xz by 4%** |
 | Silesia corpus (202 MB total) | **4.35×** | bzip2: 3.89× — **+12%** |
@@ -40,7 +39,7 @@ MCX targets **maximum compression ratio** while maintaining practical speeds. It
 - **LZ77** (L1–L9) — fast compression with greedy/lazy matching and hash chain match finders
 - **BWT + multi-table rANS** (L10–L14) — Burrows-Wheeler Transform with K-means clustered frequency tables
 - **LZRC v2.0** (L24–L26) — LZ + adaptive range coder with binary tree or hash chain match finder, LZMA-style matched literal coding, 4-state machine, rep-match distances
-- **Context Mixing** (L28) — PAQ8-class bit-level compressor: 58 context models, 8 logit-space neural mixers, 3-stage APM cascade, adaptive StateMap — beats bzip2 by 17–30% on text, beats PAQ8l on alice29
+- **Context Mixing** (L28) — PAQ8-class bit-level compressor: 58 context models, 8 logit-space neural mixers, 3-stage APM cascade, adaptive StateMap; repository-reported text benchmarks appear below
 - **Stride-Delta** — auto-detects fixed-width records (1–512 byte stride) for structured binary data
 
 ### Entropy Coding
@@ -73,7 +72,7 @@ MCX targets **maximum compression ratio** while maintaining practical speeds. It
 ```bash
 # Build
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build -j$(nproc)
+cmake --build build --parallel
 
 # Compress
 ./build/bin/mcx compress myfile.txt                # fast (L3)
@@ -106,7 +105,7 @@ cp completions/mcx.fish ~/.config/fish/completions/mcx.fish
 sudo cp docs/mcx.1 /usr/local/share/man/man1/
 ```
 
-**Requirements:** C99 compiler (GCC, Clang, MSVC), CMake ≥ 3.10. Optional: OpenMP for multi-threading.
+**Requirements:** C99 compiler (GCC, Clang, MSVC), CMake ≥ 3.15. Optional: OpenMP for multi-threading.
 
 ## Usage
 
@@ -284,7 +283,7 @@ Level 28 enables the context mixing engine — a PAQ8-class bit-level compressor
 | dickens | 9.7 MB | 3.64× | 4.07× | **4.60×** | **+26%** |
 | reymont | 6.3 MB | 5.32× | 5.93× | **6.89×** | **+30%** |
 
-The CM engine uses 58 context models (order-0 through order-14, word, sparse, indirect, cross-context, linguistic), 8 logit-space neural network mixers with cross-terms, and a 3-stage Adaptive Probability Map cascade. It beats bzip2 by 17–30% on all text data and surpasses PAQ8l on alice29.txt.
+The CM engine uses 58 context models (order-0 through order-14, word, sparse, indirect, cross-context, linguistic), 8 logit-space neural network mixers with cross-terms, and a 3-stage Adaptive Probability Map cascade. The reported alice29.txt ratio matches PAQ8l to two decimal places; broader performance claims require independently reproduced comparisons.
 
 ### Large Files
 
@@ -399,7 +398,7 @@ maxcomp/
 - **[FORMAT.md](docs/FORMAT.md)** — MCX file format specification
 - **[API.md](docs/API.md)** — C API reference
 - **[DESIGN.md](docs/V2_DESIGN.md)** — v2.0 architecture and design decisions
-- **[BENCHMARKS.md](docs/BENCHMARKS.md)** — Comprehensive benchmark tables
+- **[Benchmarks](#benchmarks)** — Repository-reported benchmark tables
 - **[ROADMAP.md](docs/ROADMAP.md)** — Development roadmap and research log
 - **[CHANGELOG.md](CHANGELOG.md)** — Version history
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** — Contribution guidelines
@@ -408,8 +407,8 @@ maxcomp/
 ## Roadmap
 
 ### Completed ✅
-- BWT + multi-table rANS — beats bzip2 on all standard benchmarks
-- Adaptive arithmetic coding on LZ output — best-in-class LZ ratios
+- BWT + multi-table rANS — comparisons are summarized in the repository-reported benchmarks above
+- Adaptive arithmetic coding on LZ output
 - Smart Mode (L20) with stride-delta, E8/E9, multi-trial strategy selection
 - LZRC v2.0 — LZ + range coder with BT/HC match finders, rep-matches, matched literals
 - OpenMP block parallelism
